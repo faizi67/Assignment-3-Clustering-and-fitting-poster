@@ -166,3 +166,67 @@ clusters = 3
 #KMeans Clustering
 kmeans = KMeans(n_clusters=clusters, random_state=42)
 cluster_out = kmeans.fit_predict(scaled_data)
+
+
+# In[110]:
+
+
+# Add the cluster labels to the dataset
+grouped_data["Cluster"] = cluster_out
+grouped_data.groupby("Cluster").mean()
+labels = selected_indicators
+
+
+# In[111]:
+
+
+# Selecting one country from each cluster
+grouped_data.groupby("Cluster").last()
+# Comparing values for each country
+grouped_data.groupby("Cluster").last().plot(kind="bar", figsize=(15, 5))
+plt.title("Each Clusters")
+plt.ylabel("Qty Measured")
+plt.show()
+
+
+# In[125]:
+
+
+def forcast(x, a, b):
+    return a*x + b
+
+def f_model(x_values, y_values, linear_func, sigma=[1.0, 1.0]):
+      popt, pcov = curve_fit(linear_func, x_values, y_values)
+      x_pred = np.arange(2022, 2042)
+      y_pred = linear_func(x_pred, *popt)
+      lower, upper = err_ranges(x_pred, linear_func, popt, sigma)
+
+    
+    
+      print("Predictions",y_pred)
+      
+      
+      
+      plt.figure(figsize=(12, 5))
+      plt.plot(x_values, y_values, label='History Data',color='red')
+      plt.plot(x_pred, y_pred, label='Future Predictions',color='black')
+      plt.fill_between(x_pred, lower, upper, color='purple', alpha=0.2, label='CI')
+      plt.legend()
+      plt.title("PArable land (% of land area)")
+      plt.xlabel('Year')
+      plt.show()
+
+
+# In[126]:
+
+
+#getting required data to get train our model
+values = country_data[("World", "Arable land (% of land area)")]
+values=values.dropna()
+X_input = values.index.astype("int")
+y_input = values.values.astype("float64")
+
+f_model(X_input, y_input, forcast)
+
+
+# In[ ]:
