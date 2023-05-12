@@ -52,3 +52,117 @@ selected_indicators = [
 'Urban population',
 'Electric power consumption (kWh per capita)'
 ]
+
+# In[ ]:
+
+
+# Filter the dataset for the required indicators
+extracted_results = data[data["Indicator Name"].isin(selected_indicators)]
+# Extracting data for only countries we are interested in
+countries_ls = [country.name for country in list(pycountry.countries)]
+extracted_resutls = extracted_results[extracted_results["Country Name"].isin(countries_ls)]
+
+
+# In[80]:
+
+
+# Filter the dataset for the required indicators
+filtered_data = data[data["Indicator Name"].isin(selected_indicators)]
+
+# Get the list of country names we are interested in
+countries_of_interest = [country.name for country in list(pycountry.countries)]
+
+# Extract data for only the countries of interest
+extracted_data = filtered_data[filtered_data["Country Name"].isin(countries_of_interest)]
+
+# Reset the index
+extracted_data.reset_index(drop=True, inplace=True)
+
+
+# In[83]:
+
+
+#missing values imputation   
+#data has lot of missing values so this is the best strategy to impute missing values
+data = extracted_data.fillna(method='ffill').fillna(method='bfill')
+grouped_data = data.pivot_table(index='Country Name', columns='Indicator Name', values='2020')
+
+
+# In[ ]:
+
+
+# Data Visualization
+
+
+# In[66]:
+
+
+electric_consumption=grouped_data['Electric power consumption (kWh per capita)'].sort_values(ascending=False)[0:10]
+
+
+# In[70]:
+
+
+plt.figure(figsize=(12,5))
+sns.barplot(x=electric_consumption.index,y=electric_consumption.values)
+plt.title('Top  Countries with Most Electric Consumption for 2020')
+plt.show()
+
+
+# In[101]:
+
+
+plt.figure(figsize=(12,5))
+sns.lineplot(grouped_data['Agricultural land (sq. km)'].sort_values(ascending=False)[0:30])
+plt.title('Countries with Most Agricultural Land in SQ for 2020')
+plt.xticks(rotation=90)
+plt.show()
+
+
+# In[102]:
+
+
+plt.figure(figsize=(12,5))
+sns.lineplot(grouped_data['Urban population'].sort_values(ascending=False)[0:30])
+plt.title('Most Urban Populated Countries for 2020')
+plt.xticks(rotation=90)
+plt.show()
+
+
+# In[99]:
+
+
+
+
+
+# In[104]:
+
+
+grouped_data['CO2 emissions from solid fuel consumption (kt)'].sort_values(ascending=False)[0:10].plot(kind='bar')
+plt.title('CO2 emissions from solid fuel consumption (kt) by Top Countries for 2020')
+plt.show()
+
+
+# In[58]:
+
+
+# data Normalization
+std_scaler=StandardScaler()
+scaled_data = std_scaler.fit_transform(grouped_data.values)
+min=np.min(grouped_data.values)
+max=np.max(grouped_data.values)
+
+
+# In[108]:
+
+
+# number of clusters
+clusters = 3
+
+
+# In[109]:
+
+
+#KMeans Clustering
+kmeans = KMeans(n_clusters=clusters, random_state=42)
+cluster_out = kmeans.fit_predict(scaled_data)
