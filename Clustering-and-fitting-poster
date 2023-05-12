@@ -1,1 +1,54 @@
+import numpy as np                                      
+import pandas as pd 
+get_ipython().system('pip install -q pycountry')
+import pycountry                                        
+import statsmodels.api as sm                 
+from errors import err_ranges               
+import seaborn as sns                                   
+import matplotlib.pyplot as plt                         
+from sklearn.preprocessing import StandardScaler          
+from sklearn.cluster import KMeans                      
+from scipy.optimize import curve_fit                  
 
+
+# In[2]:
+
+
+
+
+
+# In[50]:
+
+
+def process_climate_data(file_path):
+    # Read the data from the CSV file, skipping the metadata rows
+    data = pd.read_csv(file_path, skiprows=4)
+
+    # Remove unnecessary columns
+    data = data.iloc[:, :-1]
+
+    # Create a dataset indexed by Country and Indicator
+    country_data = data.set_index(["Country Name", "Indicator Name"])
+    country_data.drop(["Country Code", "Indicator Code"], axis=1, inplace=True)
+
+    # Transpose the country_data to have countries as rows and indicators as columns
+    country_data = country_data.transpose()
+    
+    return country_data,data
+
+
+# In[51]:
+
+
+country_data,data=process_climate_data("wb_data.csv")
+
+
+# In[79]:
+
+
+selected_indicators = [
+'CO2 emissions from solid fuel consumption (kt)',
+'Electric power consumption (kWh per capita)',
+'Urban population',
+'Electric power consumption (kWh per capita)'
+]
